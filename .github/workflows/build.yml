@@ -1,0 +1,33 @@
+
+name: Build WhatsApp Siri Patch
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure iOS build
+        run: cmake -B build-cmake -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile WhatsApp patch and NetworkLoader
+        run: |
+          cmake --build build-cmake \
+            --config Release \
+            --target WhatsAppDisableSiriEntitlement NetworkLoader \
+            --parallel
+
+      - name: Package compiled dylibs
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhatsApp-Siri-Fix
+          path: |
+            build/WhatsAppDisableSiriEntitlement.dylib
+            build/NetworkLoader.dylib
