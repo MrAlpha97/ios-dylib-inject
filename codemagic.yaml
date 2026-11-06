@@ -1,0 +1,28 @@
+
+workflows:
+  whatsapp-siri-fix:
+    name: Build WhatsApp Siri Entitlement Patch
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      xcode: latest
+
+    scripts:
+      - name: Initialize Git submodules
+        script: |
+          git submodule update --init --recursive
+
+      - name: Configure iOS ARM64 build
+        script: |
+          cmake -B build-cmake -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile required dylibs
+        script: |
+          cmake --build build-cmake \
+            --config Release \
+            --target WhatsAppDisableSiriEntitlement NetworkLoader \
+            --parallel 4
+
+    artifacts:
+      - build/*.dylib
